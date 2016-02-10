@@ -60,18 +60,18 @@ var getGitHubProfile = function (user, callback) {
  });
 };
 
-var getGitHubProfileAsync; // TODO
+var getGitHubProfileAsync = Promise.promisify(getGitHubProfile); // TODO
 
 
 // (2) Asyncronous token generation
 var generateRandomToken = function (callback) {
  crypto.randomBytes(20, function(err, buffer) {
-   if (err) return callback(err, null)
+   if (err) return callback(err, null);
    callback(null, buffer.toString('hex'));
  });
 };
 
-var generateRandomTokenAsync; // TODO
+var generateRandomTokenAsync = Promise.promisify(generateRandomToken); // TODO
 
 
 // (3) Asyncronous file manipulation
@@ -83,13 +83,13 @@ var readFileAndMakeItFunny = function (filePath, callback) {
      .map(function(line) {
        return line + ' lol';
      })
-     .join('\n')
+     .join('\n');
 
-   callback(funnyFile);
+   callback(null, funnyFile);
  });
 };
 
-var readFileAndMakeItFunnyAsync; // TODO
+var readFileAndMakeItFunnyAsync = Promise.promisify(readFileAndMakeItFunny);
 
 // Export these functions so we can unit test them
 // and reuse them in later code ;)

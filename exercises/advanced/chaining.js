@@ -51,9 +51,43 @@ var lib = require('../../lib/advancedChainingHelpers.js');
 // Visit the following url to sign up for a free account
 //     https://developer.clarifai.com/accounts/login/?next=/applications/
 // Then, create a new Application and pass your Client Id and Client Secret into the method below
-lib.setImageTaggerCredentials('YOUR_CLIENT_ID', 'YOUR_CLIENT_SECRET')
+lib.setImageTaggerCredentials('bl9m8IOnvUWWh-2eop-0aUgIsYRZmSNdBk77jxCq', 'YvtIYPWxUUHoBA0EX06yI6WYKNfWL4SzcJtEg2Bf');
 
 var searchCommonTagsFromGitHubProfiles = function(githubHandles) {
+  //1) get the public profile associated with each handle
+  //results to json object
+  
+  //Get promises for all Github avatars
+  var allAvatars = githubHandles.map(function(handle) {
+    return lib.getGitHubProfile(handle).
+      then(function(profileObj){
+        if(profileObj.message) {
+          //throw new Error (profileObj.message);
+        }
+        return profileObj.avatarUrl;
+      });
+  });
+  
+  //Get promise for token for Clarifai
+  var token = lib.authenticateImageTagger();
+  
+  //Once we have all Avatars and the token we can proceed
+  return Promise.all(allAvatars.concat(token)).
+    then(function(vals) {
+      var token = vals.splice(vals.length-1)[0];
+      var allTags = vals.map(function(avatar){
+        return lib.tagImage(avatar, token);
+      });
+      
+      return Promise.all(allTags, function(tags){
+        return lib.getIntersection(tags)[0];
+      }).catch(function(err){
+        console.log(err);
+      });  
+    });
+  //2) extract the avatar_url of each profile
+  //4) get the set of tags for each avatar_url (requires authentication)
+  //5) find the intersection of the tags
 };
 
 // Export these functions so we can unit test them
